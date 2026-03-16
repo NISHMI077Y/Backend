@@ -27,7 +27,7 @@ async function createAdmin() {
       password: hashedPassword
     });
 
-    console.log("✅ Default admin created successfully!");
+    console.log("Default admin created successfully!");
     console.log("Username: admin");
     console.log("Password: admin123");
 
