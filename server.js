@@ -10,7 +10,9 @@ const app = express();
 
 // Middleware
 app.use(cors({
-  origin: "http://localhost:5173",
+  origin: ["http://localhost:5173",
+    "https://frontend-two-dun-fin49x3kv1.vercel.app"
+  ], 
   credentials: true,
 }));
 app.use(express.json());
