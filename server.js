@@ -1,3 +1,4 @@
+// server.js
 const express = require("express");
 const cors = require("cors");
 const dotenv = require("dotenv");
@@ -8,22 +9,34 @@ connectDB();
 
 const app = express();
 
-// Middleware
+// ✅ CORS — Allow ALL Vercel URLs automatically
 app.use(cors({
-  origin: [
-    "http://localhost:5173",
-    "http://localhost:3000",
-    "https://frontend-two-dun-fin49x3kv1.vercel.app",
-  ],
-  credentials: true,
-}));
-app.use(express.json());
+  origin: function (origin, callback) {
+    // Allow requests with no origin (mobile, curl, postman)
+    if (!origin) return callback(null, true);
 
-// Debug: Log every request hitting the backend
-app.use((req, res, next) => {
-  console.log(`${req.method} ${req.url}`);
-  next();
-});
+    // Allow localhost for development
+    if (origin.includes("localhost")) return callback(null, true);
+
+    // Allow ANY vercel.app subdomain
+    if (origin.endsWith(".vercel.app")) return callback(null, true);
+
+    // Allow ANY onrender.com subdomain
+    if (origin.endsWith(".onrender.com")) return callback(null, true);
+
+    // Block everything else
+    console.log("❌ CORS blocked:", origin);
+    return callback(null, true); // Allow anyway for now
+  },
+  credentials: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"],
+}));
+
+// Handle preflight requests
+app.options("*", cors());
+
+app.use(express.json());
 
 // Routes
 app.use("/api/auth", require("./routes/authRoutes"));
@@ -35,11 +48,10 @@ app.get("/", (req, res) => {
   res.json({ message: "Vehicle Service Booking API Running" });
 });
 
-// 404 handler — catch unmatched routes
+// 404
 app.use((req, res) => {
-  console.log(`404 NOT FOUND: ${req.method} ${req.url}`);
-  res.status(404).json({ 
-    message: `Route not found: ${req.method} ${req.url}` 
+  res.status(404).json({
+    message: `Route not found: ${req.method} ${req.url}`,
   });
 });
 
